@@ -20,11 +20,10 @@ a simple and flexible data model based on triples:
 
 ## Graphs
 
-TODO show a gruff image
-
 Graphs can be easily merged (unlike tables and documents). This is useful for open linked data but also for enterprise data integration.
 
 ## Resources
+
 Resources are things (either concrete or abstract) that can be identified as individual entities in some universe of discourse.
 
 - Subjects are resources
@@ -42,25 +41,27 @@ Resources are identified by IRIs (international URIs, not necessarily URLs).
 
 - Just see [SPARQL in 11 minutes](https://www.youtube.com/watch?v=FvGndkpa4K0)
 
-## Schema 
+## Schema
 
 to describe predicates and sets of resources (classes)
+
 - we use regular triples:
 
         :title rdf:type rdf:Property
         :title rdfs:label "the title of a book"@en
         :title rdfs:domain :Book
 
-- so we can go *meta*
+- so we can go _meta_
 
         rdf:type rdf:type rdf:Property
         rdfs:label rdfs:label "a human readable label"
         rdfs:Class rdf:type rdfs:Class
 
-    things may get mind bending but are logically sound
+  things may get mind bending but are logically sound
 
 ## Semantics
-Semantics is about explaining some meaning in plain English (e.g. *rdfs:label*) as well as defining logical relations (e.g. *rdfs:subClassOf*) with precise formal meaning that can be exploited by rule engines.
+
+Semantics is about explaining some meaning in plain English (e.g. _rdfs:label_) as well as defining logical relations (e.g. _rdfs:subClassOf_) with precise formal meaning that can be exploited by rule engines.
 
     :Man rdfs:subClassOf :Mortal
     :Socrates rdf:type :Man
@@ -69,9 +70,9 @@ Semantics is about explaining some meaning in plain English (e.g. *rdfs:label*) 
 OWL builds on RDF Schema providing further reasoning.
 
 ## Constraints
+
 In the open world of the semantic web
 
-*everybody can say anything about everything*
+_everybody can say anything about everything_
 
 but to build reliable applications we need precise data shapes and constraints (SHACL).
-

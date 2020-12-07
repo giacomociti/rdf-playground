@@ -1,0 +1,16 @@
+﻿@prefix w: <http://workflow.org/> .
+@prefix : <http://example.org/> .
+
+:search a w:Process ;
+    w:startAt :validation .
+:validation a w:AskStep ;
+    w:sparql "validation.rq" ;
+    w:nextOnTrue :retrieval ;
+    w:nextOnFalse :ko .
+:retrieval a w:ConstructStep ;
+    w:sparql "retrieval.rq" ;
+    w:next :ok .
+:ko a w:FinalStep ;
+    w:success false .
+:ok a w:FinalStep ;
+    w:success true .

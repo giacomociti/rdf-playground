@@ -1,0 +1,8 @@
+﻿prefix : <http://example.org/>
+
+ASK
+WHERE {
+    ?request a :SearchRequest ;
+        :keyword ?keyword .
+    FILTER (strlen(?keyword) > 3)
+}

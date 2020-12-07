@@ -1,0 +1,12 @@
+﻿prefix : <http://example.org/>
+
+CONSTRUCT {
+    ?result :about ?keyword .
+}
+WHERE {
+    ?request a :SearchRequest ;
+        :keyword ?keyword .
+    SERVICE <http://localhost:7200/repositories/workflow> {
+        ?result :about ?keyword .
+    }
+}

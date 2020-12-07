@@ -1,0 +1,4 @@
+﻿@prefix : <http://example.org/> .
+
+_: a :SearchRequest ;
+    :keyword "logic", "software" .
