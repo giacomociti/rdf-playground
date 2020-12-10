@@ -6,10 +6,15 @@
 :Database a rdfs:Class .
 :Process a rdfs:Class .
 :Step a rdfs:Class .
-:ConstructStep rdfs:subClassOf :Step .
-:AskStep rdfs:subClassOf :Step .
-:DatabaseUpdateStep rdfs:subClassOf :Step .
-:FinalStep rdfs:subClassOf :Step .
+
+:ConstructStep a rdfs:Class ;
+    rdfs:subClassOf :Step .
+:AskStep a rdfs:Class ;
+    rdfs:subClassOf :Step .
+:DatabaseUpdateStep a rdfs:Class ;
+    rdfs:subClassOf :Step .
+:FinalStep a rdfs:Class ;
+    rdfs:subClassOf :Step .
 
 :startAt a rdf:Property ;
     rdfs:domain :Process ;

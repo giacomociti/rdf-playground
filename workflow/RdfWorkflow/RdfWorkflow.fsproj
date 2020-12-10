@@ -12,6 +12,8 @@
     <None Include="Examples\Search\input.ttl" />
     <None Include="Examples\Search\workflow.ttl" />
     <None Include="schema.ttl" />
+    <Compile Include="Utils.fs" />
+    <Compile Include="Workflow.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
