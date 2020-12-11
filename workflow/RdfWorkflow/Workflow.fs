@@ -1,9 +1,6 @@
-﻿module Workflow
+﻿namespace RdfWorkflow
 
-#if INTERACTIVE
-#r "nuget: Iride"
-#endif
-
+open System
 open VDS.RDF
 open VDS.RDF.Query
 open Iride
@@ -12,62 +9,90 @@ open Utils
 type Schema = GraphProvider<Schema = "schema.ttl">
 type Classes = UriProvider<"schema.ttl", SchemaQuery.RdfsClasses>
     
-type State = { Id: int; Step: Schema.Step; Result: bool option } 
+type State = { StepNumber: int; Step: INode; Result: bool option } 
 
-let run 
-    (configuration: IGraph) 
-    (sparqlFactory: string -> SparqlQuery)
-    (workflow: IGraph)
-    (input: IGraph) =
-    
-    let information = new Graph()
-    information.Merge configuration
-    information.Merge input
+type Status = Succeded | Failed | Suspended
 
-    let askStep node =
-        let step = Schema.AskStep node
-        if ask (sparqlFactory step.Sparql.Single) information
-        then step.NextOnTrue.Single
-        else step.NextOnFalse.Single
+type Response = { StepNumber: int; StepUri: Uri; Status: Status; Data: IGraph }
+type ResumeRequest = { StepNumber: int; StepUri: Uri; Data: IGraph }
 
-    let constructStep node =
-        let step = Schema.ConstructStep node
-        information
-        |> construct (sparqlFactory step.Sparql.Single) 
-        |> information.Merge
-        step.Next.Single
-
-    let updateStep node = 
-        let step = Schema.DatabaseUpdateStep node
-        //TODO
-        step.Next.Single
+type Workflow
+    (configuration: IGraph,
+    sparqlFactory: string -> SparqlQuery,
+    workflow: IGraph) =
 
     let finalStep node = (Schema.FinalStep node).Success.Single
 
-    let nextState state nextStep = { state with Id = state.Id+1; Step = nextStep }
+    let nextState state nextStep = 
+        { state with StepNumber = state.StepNumber+1; Step = nextStep }
 
-    let finalState state result = { state with Id = state.Id+1; Result = Some result }
+    let finalState state result = 
+        { state with StepNumber = state.StepNumber+1; Result = Some result }
     
-    let next step state = step state.Step.Node |> nextState state
+    let next step state = step state.Step |> nextState state
 
-    let final state = finalStep state.Step.Node |> finalState state
+    let final state = finalStep state.Step |> finalState state
 
-    // TODO: external call, suspend call, subprocess\procedure call
-    let steps = dict [
-        Classes.AskStep, next askStep
-        Classes.ConstructStep, next constructStep
-        Classes.DatabaseUpdateStep, next updateStep
-        Classes.FinalStep, final ]
+    let run (input: IGraph, state: State) =
+    
+        let information = new Graph()
+        information.Merge configuration
+        information.Merge input
 
-    let rec runSteps state =  
-        match state.Result with
-        | Some result -> result
-        | None -> 
-            let stepType = state.Step.Node.Types.Single
-            match steps.TryGetValue stepType with
-            | true, step -> runSteps (step state)
-            | _ -> failwith $"Unknown step {stepType}"
-        
-    let w = Schema.Process.Get(workflow).Single
-    let success = runSteps { Id = 0; Step = w.StartAt.Single; Result = None }
-    success, information
+        let askStep node =
+            let step = Schema.AskStep node
+            if ask (sparqlFactory step.Sparql.Single) information
+            then step.NextOnTrue.Single.Node
+            else step.NextOnFalse.Single.Node
+
+        let constructStep node =
+            let step = Schema.ConstructStep node
+            information
+            |> construct (sparqlFactory step.Sparql.Single) 
+            |> information.Merge
+            step.Next.Single.Node
+
+        let updateStep node = 
+            let step = Schema.DatabaseUpdateStep node
+            //TODO
+            step.Next.Single.Node
+
+        // TODO: custom call, subprocess\procedure call
+        let steps = dict [
+            Classes.AskStep, askStep
+            Classes.ConstructStep, constructStep
+            Classes.DatabaseUpdateStep, updateStep ]
+
+        let rec runSteps state =  
+            let stepType = state.Step.Types.Single
+            if stepType = Classes.YieldStep then state
+            elif stepType = Classes.FinalStep then final state
+            else 
+                match steps.TryGetValue stepType with
+                | true, step -> runSteps (next step state)
+                | _ -> failwith $"Unknown step {stepType}"
+      
+        runSteps state, information
+
+    let response (state, data) =
+        let status = 
+             match state.Result with
+             | None -> Suspended
+             | Some true -> Succeded
+             | Some false -> Failed
+        { StepNumber = state.StepNumber; StepUri = state.Step.Uri; Status = status; Data = data }
+
+    member _.Start(input: IGraph) =
+        let p = Schema.Process.Get(workflow).Single
+        let state = { StepNumber = 0; Step = p.StartAt.Single.Node; Result = None }
+        run (input, state)
+        |> response
+
+    member _.Resume(request: ResumeRequest) =
+        let yieldStep = 
+            Schema.YieldStep.Get(workflow) 
+            |> Seq.filter (fun x -> x.Node.Uri = request.StepUri)
+            |> Seq.exactlyOne
+        let state = {StepNumber = request.StepNumber+1; Step = yieldStep.Next.Single.Node; Result = None}
+        run (request.Data, state)
+        |> response

@@ -1,0 +1,9 @@
+﻿@prefix w: <http://workflow.org/> .
+@prefix : <http://example.org/> .
+
+:w2 a w:Process ;
+    w:startAt :s1 .
+:s1 a w:YieldStep ;
+    w:next :ok .
+:ok a w:FinalStep ;
+    w:success true .

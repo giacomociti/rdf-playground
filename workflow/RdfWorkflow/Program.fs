@@ -3,6 +3,7 @@ open System.Collections.Generic
 open VDS.RDF
 open VDS.RDF.Parsing
 open Utils
+open RdfWorkflow
 
 let queryFactory (queryFolder: DirectoryInfo) =
     let queries = Dictionary<_,_>()
@@ -22,7 +23,7 @@ let runFromFiles (configuration: FileInfo) (workflow: FileInfo) (input: FileInfo
     let configuration = parseTurtle configuration.FullName
     let workflow = parseTurtle workflow.FullName
     let input = parseTurtle input.FullName
-    Workflow.run configuration getQuery workflow input
+    Workflow(configuration, getQuery, workflow).Start input
 
 [<EntryPoint>]
 let main argv =
@@ -30,12 +31,12 @@ let main argv =
     | [| configuration; workflow; input |] ->
         let c, w, i = (FileInfo configuration), (FileInfo workflow), (FileInfo input)
 
-        let success, information = runFromFiles c w i
+        let res = runFromFiles c w i
 
-        printfn "Result %b" success
+        printfn $"{res.Status} <{res.StepUri}> after {res.StepNumber} steps" 
         let resultName = $"{Path.GetFileNameWithoutExtension(i.Name)}.out{i.Extension}"
         let resultFile = Path.Combine(i.Directory.FullName, resultName)
-        information.SaveToFile resultFile
+        res.Data.SaveToFile resultFile
         0
     | _ -> 
         printfn "invalid arguments"
