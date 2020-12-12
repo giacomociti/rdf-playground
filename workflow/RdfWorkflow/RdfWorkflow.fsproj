@@ -1,20 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Examples\Search\configuration.ttl" />
-    <None Include="Examples\Search\retrieval.rq" />
-    <None Include="Examples\Search\validation.rq" />
-    <None Include="Examples\Search\input.ttl" />
-    <None Include="Examples\Search\workflow.ttl" />
     <None Include="schema.ttl" />
     <Compile Include="Utils.fs" />
     <Compile Include="Workflow.fs" />
-    <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>

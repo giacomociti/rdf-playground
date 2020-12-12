@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "RdfWorkflow.Examples": {
+      "commandName": "Project",
+      "commandLineArgs": "configuration.ttl workflow.ttl input.ttl",
+      "workingDirectory": "C:\\Repos\\oss\\rdf-playground\\workflow\\RdfWorkflow.Examples\\Examples\\Search"
+    }
+  }
+}

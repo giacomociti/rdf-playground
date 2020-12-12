@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="Examples\Search\configuration.ttl" />
+    <None Include="Examples\Search\input.ttl" />
+    <None Include="Examples\Search\retrieval.rq" />
+    <None Include="Examples\Search\validation.rq" />
+    <None Include="Examples\Search\workflow.ttl" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup />
+
+  <ItemGroup>
+    <ProjectReference Include="..\RdfWorkflow\RdfWorkflow.fsproj" />
+  </ItemGroup>
+
+</Project>

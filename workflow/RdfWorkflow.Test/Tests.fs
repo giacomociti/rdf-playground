@@ -55,4 +55,5 @@ let ``Yield and resume`` () =
     
     let finalResponse = w.Resume { StepNumber = response.StepNumber; StepUri = response.StepUri; Data = new Graph() }
     Assert.Equal(Status.Succeded, finalResponse.Status)
+    Assert.Equal(2, finalResponse.StepNumber)
     Assert.Equal(Uri "http://example.org/ok", finalResponse.StepUri)
