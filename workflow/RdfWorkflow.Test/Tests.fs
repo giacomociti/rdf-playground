@@ -13,7 +13,7 @@ let ``Failure`` () =
     let s1 = "ASK WHERE { ?input a <http://example.org/test> }"
     let workflowGraph = Utils.parseTurtle "workflow1.ttl"
     let queryFactory _ = SparqlQueryParser().ParseFromString s1
-    let w = Workflow(cfg, queryFactory, workflowGraph)
+    let w = Workflow(cfg, Steps queryFactory, workflowGraph)
     let input = new Graph()
 
     let response = w.Start(input)
@@ -28,7 +28,7 @@ let ``Success`` () =
     let s1 = "ASK WHERE { ?input a <http://example.org/test> }"
     let workflowGraph = Utils.parseTurtle "workflow1.ttl"
     let queryFactory _ = SparqlQueryParser().ParseFromString s1
-    let w = Workflow(cfg, queryFactory, workflowGraph)
+    let w = Workflow(cfg, Steps queryFactory, workflowGraph)
     let input = new Graph()
     let subject = input.CreateBlankNode()
     let predicate = input.CreateUriNode(UriFactory.Create RdfSpecsHelper.RdfType)
@@ -46,7 +46,7 @@ let ``Yield and resume`` () =
     let cfg = new Graph()
     let workflowGraph = Utils.parseTurtle "workflow2.ttl"
     let queryFactory _ = failwith "no need"
-    let w = Workflow(cfg, queryFactory, workflowGraph)
+    let w = Workflow(cfg, Steps queryFactory, workflowGraph)
     
     let response = w.Start(new Graph())
     Assert.Equal(Status.Suspended, response.Status)

@@ -8,7 +8,38 @@ open Utils
 
 type Schema = GraphProvider<Schema = "schema.ttl">
 type Classes = UriProvider<"schema.ttl", SchemaQuery.RdfsClasses>
-    
+
+  
+type Steps(sparqlFactory: string -> SparqlQuery) =
+
+    let askStep data node =
+        let step = Schema.AskStep node
+        if ask (sparqlFactory step.Sparql.Single) data
+        then step.NextOnTrue.Single.Node
+        else step.NextOnFalse.Single.Node
+
+    let constructStep data node =
+        let step = Schema.ConstructStep node
+        data
+        |> construct (sparqlFactory step.Sparql.Single) 
+        |> data.Merge
+        step.Next.Single.Node
+
+    let updateStep data node = 
+        let step = Schema.DatabaseUpdateStep node
+        //TODO
+        step.Next.Single.Node
+
+    let steps = dict [
+        Classes.AskStep, askStep
+        Classes.ConstructStep, constructStep
+        Classes.DatabaseUpdateStep, updateStep ]
+
+    member _.Get(stepTypeUri) =
+        match steps.TryGetValue stepTypeUri with
+        | true, step -> step
+        | _ -> failwith $"Unknown step {stepTypeUri}"
+
 type State = { StepNumber: int; Step: INode; Result: bool option } 
 
 type Status = Succeded | Failed | Suspended
@@ -18,7 +49,7 @@ type ResumeRequest = { StepNumber: int; StepUri: Uri; Data: IGraph }
 
 type Workflow
     (configuration: IGraph,
-    sparqlFactory: string -> SparqlQuery,
+    steps: Steps,
     workflow: IGraph) =
 
     let finalStep node = (Schema.FinalStep node).Success.Single
@@ -34,45 +65,19 @@ type Workflow
     let final state = finalStep state.Step |> finalState state
 
     let run (input: IGraph, state: State) =
-    
-        let information = new Graph()
-        information.Merge configuration
-        information.Merge input
-
-        let askStep node =
-            let step = Schema.AskStep node
-            if ask (sparqlFactory step.Sparql.Single) information
-            then step.NextOnTrue.Single.Node
-            else step.NextOnFalse.Single.Node
-
-        let constructStep node =
-            let step = Schema.ConstructStep node
-            information
-            |> construct (sparqlFactory step.Sparql.Single) 
-            |> information.Merge
-            step.Next.Single.Node
-
-        let updateStep node = 
-            let step = Schema.DatabaseUpdateStep node
-            //TODO
-            step.Next.Single.Node
-
-        // TODO: custom call, subprocess\procedure call
-        let steps = dict [
-            Classes.AskStep, askStep
-            Classes.ConstructStep, constructStep
-            Classes.DatabaseUpdateStep, updateStep ]
+        let data = new Graph()
+        data.Merge configuration
+        data.Merge input
 
         let rec runSteps state =  
             let stepType = state.Step.Types.Single
             if stepType = Classes.YieldStep then state
             elif stepType = Classes.FinalStep then final state
             else 
-                match steps.TryGetValue stepType with
-                | true, step -> runSteps (next step state)
-                | _ -> failwith $"Unknown step {stepType}"
-      
-        runSteps state, information
+                let step = steps.Get(stepType) data
+                runSteps (next step state) 
+
+        runSteps state, data
 
     let response (state, data) =
         let status = 
@@ -89,10 +94,7 @@ type Workflow
         |> response
 
     member _.Resume(request: ResumeRequest) =
-        let yieldStep = 
-            Schema.YieldStep.Get(workflow) 
-            |> Seq.filter (fun x -> x.Node.Uri = request.StepUri)
-            |> Seq.exactlyOne
+        let yieldStep = request.StepUri |> workflow.GetUriNode |> Schema.YieldStep
         let state = {StepNumber = request.StepNumber+1; Step = yieldStep.Next.Single.Node; Result = None}
         run (request.Data, state)
         |> response
