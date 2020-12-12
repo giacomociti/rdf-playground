@@ -7,4 +7,5 @@
 _:autos2 :keyword "logic",
                   "software";
          a :SearchRequest.
-<http://localhost:7200/repositories/workflow> a :Database.
+:foo :about "logic".
+<http://localhost:3030/test/sparql> a :Database.

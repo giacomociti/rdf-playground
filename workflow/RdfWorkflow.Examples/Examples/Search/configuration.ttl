@@ -2,4 +2,5 @@
 @prefix w: <http://workflow.org/> .
 @prefix : <http://example.org/> .
 
-<http://localhost:7200/repositories/workflow> a :Database .
+# docker run -d -p 3030:3030 -e ADMIN_PASSWORD=admin -e FUSEKI_DATASET_1=test stain/jena-fuseki
+<http://localhost:3030/test/sparql> a :Database .

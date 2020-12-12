@@ -4,9 +4,10 @@ CONSTRUCT {
     ?result :about ?keyword .
 }
 WHERE {
+    ?database a :Database .
     ?request a :SearchRequest ;
         :keyword ?keyword .
-    SERVICE <http://localhost:7200/repositories/workflow> {
+    SERVICE ?database {
         ?result :about ?keyword .
     }
 }
