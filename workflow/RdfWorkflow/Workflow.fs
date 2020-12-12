@@ -8,24 +8,23 @@ open Utils
 
 type Schema = GraphProvider<Schema = "schema.ttl">
 type Classes = UriProvider<"schema.ttl", SchemaQuery.RdfsClasses>
-
   
 type Steps(sparqlFactory: string -> SparqlQuery) =
 
-    let askStep data node =
+    let askStep node data =
         let step = Schema.AskStep node
         if ask (sparqlFactory step.Sparql.Single) data
         then step.NextOnTrue.Single.Node
         else step.NextOnFalse.Single.Node
 
-    let constructStep data node =
+    let constructStep node data =
         let step = Schema.ConstructStep node
         data
         |> construct (sparqlFactory step.Sparql.Single) 
         |> data.Merge
         step.Next.Single.Node
 
-    let updateStep data node = 
+    let updateStep node (data: IGraph) = 
         let step = Schema.DatabaseUpdateStep node
         //TODO
         step.Next.Single.Node
@@ -47,22 +46,15 @@ type Status = Succeded | Failed | Suspended
 type Response = { StepNumber: int; StepUri: Uri; Status: Status; Data: IGraph }
 type ResumeRequest = { StepNumber: int; StepUri: Uri; Data: IGraph }
 
-type Workflow
-    (configuration: IGraph,
-    steps: Steps,
-    workflow: IGraph) =
+type Workflow (configuration: IGraph, steps: Steps, workflow: IGraph) =
 
-    let finalStep node = (Schema.FinalStep node).Success.Single
-
-    let nextState state nextStep = 
-        { state with StepNumber = state.StepNumber+1; Step = nextStep }
-
-    let finalState state result = 
+    let final state = 
+        let result = (Schema.FinalStep state.Step).Success.Single 
         { state with StepNumber = state.StepNumber+1; Result = Some result }
-    
-    let next step state = step state.Step |> nextState state
 
-    let final state = finalStep state.Step |> finalState state
+    let next state stepType data =
+        let nextStep = (steps.Get stepType) state.Step data
+        { state with StepNumber = state.StepNumber+1; Step = nextStep }
 
     let run (input: IGraph, state: State) =
         let data = new Graph()
@@ -73,10 +65,8 @@ type Workflow
             let stepType = state.Step.Types.Single
             if stepType = Classes.YieldStep then state
             elif stepType = Classes.FinalStep then final state
-            else 
-                let step = steps.Get(stepType) data
-                runSteps (next step state) 
-
+            else runSteps (next state stepType data)
+                
         runSteps state, data
 
     let response (state, data) =
