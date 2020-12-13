@@ -8,8 +8,11 @@ open Utils
 
 type Schema = GraphProvider<Schema = "schema.ttl">
 type Classes = UriProvider<"schema.ttl", SchemaQuery.RdfsClasses>
-  
-type Steps(sparqlFactory: string -> SparqlQuery) =
+
+
+type Steps
+    (customSteps,
+     sparqlFactory: string -> SparqlQuery) =
 
     let askStep node data =
         let step = Schema.AskStep node
@@ -29,10 +32,20 @@ type Steps(sparqlFactory: string -> SparqlQuery) =
         //TODO
         step.Next.Single.Node
 
-    let steps = dict [
+    let coreSteps = [
         Classes.AskStep, askStep
         Classes.ConstructStep, constructStep
         Classes.DatabaseUpdateStep, updateStep ]
+
+    let customStep action node data = 
+        action data
+        (Schema.Step node).Next.Single.Node
+
+    let additionalSteps = 
+        customSteps
+        |> List.map (fun (stepUri, action) -> stepUri, customStep action )
+
+    let steps = dict (coreSteps @ additionalSteps)
 
     member _.Get(stepTypeUri) =
         match steps.TryGetValue stepTypeUri with

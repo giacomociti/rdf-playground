@@ -7,7 +7,7 @@ open VDS.RDF.Query
 open VDS.RDF.Update
 
 type FusekiFixture() =
-    let service = 
+    let service =
         Builder()
             .UseContainer()
             .UseImage("stain/jena-fuseki")
@@ -49,6 +49,6 @@ type FusekiTest(fixture: FusekiFixture) =
         """
         let graph = SparqlRemoteEndpoint(fixture.EndpointUri).QueryWithResultGraph(query)
         Assert.Equal(2, graph.Triples.Count)
-        
+
 
 

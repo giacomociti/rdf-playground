@@ -19,7 +19,7 @@ let queryFactory (queryFolder: DirectoryInfo) =
             query
 
 let runFromFiles (configuration: FileInfo) (workflow: FileInfo) (input: FileInfo) =
-    let steps = Steps(queryFactory workflow.Directory)
+    let steps = Steps([], queryFactory workflow.Directory)
     let configuration = parseTurtle configuration.FullName
     let workflow = parseTurtle workflow.FullName
     let input = parseTurtle input.FullName
