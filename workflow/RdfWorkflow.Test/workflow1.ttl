@@ -4,7 +4,7 @@
 :w1 a w:Process ;
     w:startAt :s1 .
 :s1 a w:AskStep ;
-    w:sparql "s1.rq" ;
+    w:sparqlQuery "s1.rq" ;
     w:nextOnTrue  :ok ;
     w:nextOnFalse :ko .
 :ko a w:FinalStep ;

@@ -5,24 +5,30 @@ open VDS.RDF.Parsing
 open Utils
 open RdfWorkflow
 
-let queryFactory (queryFolder: DirectoryInfo) =
+let factory (queryFolder: DirectoryInfo) =
     let queries = Dictionary<_,_>()
     let parser = SparqlQueryParser()
-    fun fileName ->
-        match queries.TryGetValue fileName with
-        | true, query -> query
-        | _ ->
-            let query = 
-                Path.Combine(queryFolder.FullName, fileName)
-                |> parser.ParseFromFile
-            queries.Add(fileName, query)
-            query
+    { new IFactory with
+        member this.CreateQuery fileName =
+            match queries.TryGetValue fileName with
+            | true, query -> query
+            | _ ->
+                let query = 
+                    Path.Combine(queryFolder.FullName, fileName)
+                    |> parser.ParseFromFile
+                queries.Add(fileName, query)
+                query 
+        member this.CreateUpdate fileName =
+           failwith "TODO"
+        member this.CreateShaclShape fileName =
+           failwith "TODO"
 
+    }
 let runFromFiles (configuration: FileInfo) (workflow: FileInfo) (input: FileInfo) =
-    let steps = Steps([], queryFactory workflow.Directory)
-    let configuration = parseTurtle configuration.FullName
-    let workflow = parseTurtle workflow.FullName
-    let input = parseTurtle input.FullName
+    let steps = Steps([], factory workflow.Directory)
+    let configuration = parseTurtleFile configuration.FullName
+    let workflow = parseTurtleFile workflow.FullName
+    let input = parseTurtleFile input.FullName
     Workflow(configuration, steps, workflow).Start input
 
 [<EntryPoint>]

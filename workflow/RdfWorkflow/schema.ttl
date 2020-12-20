@@ -1,43 +1,65 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix : <http://workflow.org/> .
 
-:Database a rdfs:Class .
+#:Database a rdfs:Class .
 :Process a rdfs:Class .
 :Step a rdfs:Class .
 
+:FinalStep a rdfs:Class ;
+    rdfs:subClassOf :Step .
+:YieldStep a rdfs:Class ;
+    rdfs:subClassOf :Step .
+:RdfsInferenceStep a rdfs:Class ;
+    rdfs:subClassOf :Step .
+:ShaclStep a rdfs:Class ;
+    rdfs:subClassOf :Step .
 :ConstructStep a rdfs:Class ;
     rdfs:subClassOf :Step .
 :AskStep a rdfs:Class ;
     rdfs:subClassOf :Step .
-:DatabaseUpdateStep a rdfs:Class ;
+:UpdateStep a rdfs:Class ;
     rdfs:subClassOf :Step .
-:FinalStep a rdfs:Class ;
-    rdfs:subClassOf :Step .
-:YieldStep a rdfs:Class ;
+:RemoteUpdateStep a rdfs:Class ;
     rdfs:subClassOf :Step .
 
 :startAt a rdf:Property ;
     rdfs:domain :Process ;
     rdfs:range :Step .
-
-:next a rdf:Property ;
-    rdfs:domain :Step ;
-    rdfs:range :Step .
-
-:nextOnTrue a rdf:Property ;
-    rdfs:domain :AskStep ;
-    rdfs:range :Step .
-
-:nextOnFalse a rdf:Property ;
-    rdfs:domain :AskStep ;
-    rdfs:range :Step .
-
-:sparql a rdf:Property ;
-    rdfs:domain :Step ;
-    rdfs:range xsd:string .
-
 :success a rdf:Property ;
     rdfs:domain :FinalStep ;
     rdfs:range xsd:boolean .
+:next a rdf:Property ;
+    rdfs:domain :Step ;
+    rdfs:range :Step .
+:nextOnTrue a rdf:Property ;
+    rdfs:domain :AskStep ;
+    rdfs:range :Step .
+:nextOnFalse a rdf:Property ;
+    rdfs:domain :AskStep ;
+    rdfs:range :Step .
+:nextOnValid a rdf:Property ;
+    rdfs:domain :ShaclStep ;
+    rdfs:range :Step .
+:nextOnInvalid a rdf:Property ;
+    rdfs:domain :ShaclStep ;
+    rdfs:range :Step .
+:sparqlQuery a rdf:Property ;
+    schema:domainIncludes :AskStep, :ConstructStep ;
+    rdfs:range xsd:string .
+:sparqlUpdate a rdf:Property ;
+    rdfs:domain :UpdateStep, :RemoteUpdateStep ;
+    rdfs:range xsd:string .
+:shapes a rdf:Property ;
+    rdfs:domain :ShaclStep ;
+    rdfs:range xsd:string .
+:argumentsQuery a rdf:Property ;
+    rdfs:domain :RemoteUpdateStep ;
+    rdfs:range xsd:string .
+:remoteEndpoint a rdf:Property ;
+    rdfs:domain :RemoteUpdateStep ;
+    rdfs:range xsd:string . # should be uri
+
+

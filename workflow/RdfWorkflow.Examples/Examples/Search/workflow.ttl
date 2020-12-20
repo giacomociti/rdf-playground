@@ -4,11 +4,11 @@
 :search a w:Process ;
     w:startAt :validation .
 :validation a w:AskStep ;
-    w:sparql "validation.rq" ;
+    w:sparqlQuery "validation.rq" ;
     w:nextOnTrue :retrieval ;
     w:nextOnFalse :ko .
 :retrieval a w:ConstructStep ;
-    w:sparql "retrieval.rq" ;
+    w:sparqlQuery "retrieval.rq" ;
     w:next :ok .
 :ko a w:FinalStep ;
     w:success false .

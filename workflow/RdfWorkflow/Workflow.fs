@@ -5,37 +5,64 @@ open VDS.RDF
 open VDS.RDF.Query
 open Iride
 open Utils
+open VDS.RDF.Update
 
 type Schema = GraphProvider<Schema = "schema.ttl">
 type Classes = UriProvider<"schema.ttl", SchemaQuery.RdfsClasses>
 
-
-type Steps
-    (customSteps,
-     sparqlFactory: string -> SparqlQuery) =
+type Steps (customSteps, factory: IFactory) =
 
     let askStep node data =
         let step = Schema.AskStep node
-        if ask (sparqlFactory step.Sparql.Single) data
+        if ask (factory.CreateQuery step.SparqlQuery.Single) data
         then step.NextOnTrue.Single.Node
         else step.NextOnFalse.Single.Node
+
+    let shaclStep node data =
+        let step = Schema.ShaclStep node
+        let result = shacl (factory.CreateShaclShape step.Shapes.Single) data
+        data.Merge result.Graph
+        if result.Conforms 
+        then step.NextOnValid.Single.Node
+        else step.NextOnInvalid.Single.Node
 
     let constructStep node data =
         let step = Schema.ConstructStep node
         data
-        |> construct (sparqlFactory step.Sparql.Single) 
+        |> construct (factory.CreateQuery step.SparqlQuery.Single) 
         |> data.Merge
         step.Next.Single.Node
 
+    let rdfsInferenceStep node data =
+        let step = Schema.RdfsInferenceStep node
+        infer data
+        step.Next.Single.Node
+
     let updateStep node (data: IGraph) = 
-        let step = Schema.DatabaseUpdateStep node
+        let step = Schema.UpdateStep node
+        let update = factory.CreateUpdate step.SparqlUpdate.Single
+        
         //TODO
+        step.Next.Single.Node
+
+    let remoteUpdateStep node (data: IGraph) = 
+        let step = Schema.RemoteUpdateStep node
+        let endpoint = SparqlRemoteUpdateEndpoint(step.RemoteEndpoint.Single)
+        let argsQuery = factory.CreateQuery step.ArgumentsQuery.Single
+        let args = select argsQuery data
+        let update = SparqlParameterizedString step.SparqlUpdate.Single //?
+        getCommands update args
+        |> String.concat ";/n"
+        |> endpoint.Update
         step.Next.Single.Node
 
     let coreSteps = [
         Classes.AskStep, askStep
         Classes.ConstructStep, constructStep
-        Classes.DatabaseUpdateStep, updateStep ]
+        Classes.ShaclStep, shaclStep
+        Classes.RdfsInferenceStep, rdfsInferenceStep
+        Classes.UpdateStep, updateStep
+        Classes.RemoteUpdateStep, remoteUpdateStep ]
 
     let customStep action node data = 
         action data
