@@ -1,7 +1,7 @@
 ﻿@prefix w: <http://workflow.org/> .
 @prefix : <http://example.org/> .
 
-:search a w:Process ;
+:search a w:Workflow ;
     w:startAt :validation .
 :validation a w:AskStep ;
     w:sparqlQuery "validation.rq" ;

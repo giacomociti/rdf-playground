@@ -5,7 +5,7 @@
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 @prefix : <http://workflow.org/> .
 
-:Process a rdfs:Class .
+:Workflow a rdfs:Class .
 :Step a rdfs:Class .
 
 :FinalStep a rdfs:Class ;
@@ -24,7 +24,7 @@
     rdfs:subClassOf :Step .
 
 :startAt a rdf:Property ;
-    rdfs:domain :Process ;
+    rdfs:domain :Workflow ;
     rdfs:range :Step .
 :success a rdf:Property ;
     rdfs:domain :FinalStep ;

@@ -1,6 +1,8 @@
 ﻿open System.IO
 open System.Collections.Generic
 open VDS.RDF
+open VDS.RDF.Query
+open VDS.RDF.Shacl
 open VDS.RDF.Parsing
 open Utils
 open RdfWorkflow
@@ -9,7 +11,7 @@ let factory (queryFolder: DirectoryInfo) =
     let queries = Dictionary<_,_>()
     let parser = SparqlQueryParser()
     { new IFactory with
-        member this.CreateQuery fileName =
+        member _.CreateQuery fileName =
             match queries.TryGetValue fileName with
             | true, query -> query
             | _ ->
@@ -18,10 +20,15 @@ let factory (queryFolder: DirectoryInfo) =
                     |> parser.ParseFromFile
                 queries.Add(fileName, query)
                 query 
-        member this.CreateUpdate fileName =
-           failwith "TODO"
-        member this.CreateShaclShape fileName =
-           failwith "TODO"
+        member _.CreateUpdate fileName =
+            Path.Combine(queryFolder.FullName, fileName)
+            |> SparqlParameterizedString
+
+        member _.CreateShaclShape fileName =
+            let graph = new Graph()
+            let file = Path.Combine(queryFolder.FullName, fileName)
+            FileLoader.Load(graph, file)
+            new ShapesGraph(graph)
 
     }
 let runFromFiles (configuration: FileInfo) (workflow: FileInfo) (input: FileInfo) =

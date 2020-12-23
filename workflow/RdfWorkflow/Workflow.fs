@@ -112,8 +112,8 @@ type Workflow (configuration: IGraph, steps: Steps, workflow: IGraph) =
     member _.Start(input: IGraph) =
         input.Merge configuration
 
-        let p = Schema.Process.Get(workflow).Single
-        let state = { StepNumber = 0; Step = p.StartAt.Single.Node; Result = None }
+        let w = Schema.Workflow.Get(workflow).Single
+        let state = { StepNumber = 0; Step = w.StartAt.Single.Node; Result = None }
         run (input, state)
         |> response
 

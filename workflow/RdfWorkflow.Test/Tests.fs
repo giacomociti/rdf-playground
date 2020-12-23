@@ -46,7 +46,7 @@ let ``Shacl`` () =
     @prefix w: <http://workflow.org/> .
     @prefix : <http://example.org/> .
     
-    :w1 a w:Process ;
+    :w1 a w:Workflow ;
         w:startAt :s1 .
     :s1 a w:ShaclStep ;
         w:shapes "s1.ttl" ;
@@ -109,7 +109,7 @@ let ``Inference`` () =
     @prefix w: <http://workflow.org/> .
     @prefix : <http://example.org/> .
     
-    :w2 a w:Process ;
+    :w2 a w:Workflow ;
         w:startAt :s1 .
     :s1 a w:RdfsInferenceStep ;
         w:next :ok .

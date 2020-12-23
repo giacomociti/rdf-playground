@@ -57,7 +57,7 @@ type FusekiTest(fixture: FusekiFixture) =
         @prefix w: <http://workflow.org/> .
         @prefix : <http://example.org/> .
         
-        :w1 a w:Process ;
+        :w1 a w:Workflow ;
             w:startAt :s1 .
         :s1 a w:RemoteUpdateStep ;
             w:remoteEndpoint :db ;
