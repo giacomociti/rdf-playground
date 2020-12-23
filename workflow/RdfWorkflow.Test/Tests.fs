@@ -5,10 +5,6 @@ open VDS.RDF
 open VDS.RDF.Parsing
 open RdfWorkflow
 open System
-open VDS.RDF.Query.Builder
-open VDS.RDF.Query
-open VDS.RDF.Storage
-
 
 [<Fact>]
 let ``Failure`` () =
@@ -63,28 +59,15 @@ let ``Shacl`` () =
     """
     let s1 = """
     @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
     @prefix sh: <http://www.w3.org/ns/shacl#> .
-    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-    @prefix ex:	<http://example.com/ns#> . 
+    @prefix ex:	<http://example.org/> . 
 
-    ex:PersonShape
-    	a sh:NodeShape ;
-    	sh:targetClass ex:Person ;    # Applies to all persons
-    	sh:property [                 # _:b1
-    		sh:path ex:ssn ;           # constrains the values of ex:ssn
-    		sh:maxCount 1 ;
-    		sh:datatype xsd:string ;
-    		sh:pattern "^\\d{3}-\\d{2}-\\d{4}$" ;
-    	] ;
-    	sh:property [                 # _:b2
-    		sh:path ex:worksFor ;
-    		sh:class ex:Company ;
-    		sh:nodeKind sh:IRI ;
-    	] ;
-    	sh:closed true ;
-    	sh:ignoredProperties ( rdf:type ) .
-
+    ex:PersonCountShape a sh:NodeShape ;
+        sh:targetNode ex:Person ;
+        sh:property [
+            sh:path [ sh:inversePath rdf:type ] ;
+            sh:minCount 1 ;
+        ] .
     """
     let f = dict ["s1.ttl", s1] |> Utils.factory
     let w = Workflow(new Graph(), Steps([], f), workflow)
@@ -92,7 +75,7 @@ let ``Shacl`` () =
 
     let subject = validInput.CreateBlankNode()
     let predicate = validInput.CreateUriNode(UriFactory.Create RdfSpecsHelper.RdfType)
-    let object = validInput.CreateUriNode(UriFactory.Create "http://example.org/test")
+    let object = validInput.CreateUriNode(UriFactory.Create "http://example.org/Person")
     validInput.Assert(subject, predicate, object)
     
     let response = w.Start(validInput)
@@ -139,6 +122,10 @@ let ``Inference`` () =
     let w = Workflow(cfg, Steps([], f), workflowGraph)
         
     let input = new Graph()
+    let subject = input.CreateBlankNode()
+    let predicate = input.CreateUriNode(UriFactory.Create RdfSpecsHelper.RdfType)
+    let object = input.CreateUriNode(UriFactory.Create "http://example.org/Person")
+    input.Assert(subject, predicate, object)
     
     let response = w.Start(input)
     Assert.Equal(Status.Succeded, response.Status)
@@ -162,27 +149,3 @@ let ``Custom step`` () =
     Assert.Equal(2, response.StepNumber)
     Assert.Equal(Uri "http://example.org/ok", response.StepUri)
     Assert.True(called)
-
-[<Fact>]
-let ``Inject bindings`` () =
-    let m = new InMemoryManager()
-    m.Update """ prefix : <http://example.org/>
-        INSERT DATA { :s :p :o }
-    """
-    let args = m.Query "SELECT * WHERE {?s a ?o}" :?> SparqlResultSet
-    
-    let builder = GraphPatternBuilder()
-    
-    let builder = builder.InlineData(args.Variables |> Seq.toArray)
-    for result in args.Results do
-        for var in args.Variables do
-            match result.TryGetBoundValue var with
-            | true, node -> 
-                match node with
-                | :? IUriNode as n -> builder.Values(fun x -> x.Value(n.Uri))
-                | :? ILiteralNode as n -> builder.Values(fun x -> x.Value(n.Value)) // lang tag and datatype?
-                | _ -> failwith $"unexpected {node}"
-            | _ -> builder.Values(fun x -> x.Undef())
-            |> ignore
-
-    //Assert.Equal("", builder)

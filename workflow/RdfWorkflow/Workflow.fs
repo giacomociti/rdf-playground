@@ -1,10 +1,9 @@
 ﻿namespace RdfWorkflow
 
 open System
-open VDS.RDF
-open VDS.RDF.Query
 open Iride
 open Utils
+open VDS.RDF
 open VDS.RDF.Update
 
 type Schema = GraphProvider<Schema = "schema.ttl">
@@ -38,22 +37,16 @@ type Steps (customSteps, factory: IFactory) =
         infer data
         step.Next.Single.Node
 
-    let updateStep node (data: IGraph) = 
-        let step = Schema.UpdateStep node
-        let update = factory.CreateUpdate step.SparqlUpdate.Single
-        
-        //TODO
-        step.Next.Single.Node
 
     let remoteUpdateStep node (data: IGraph) = 
         let step = Schema.RemoteUpdateStep node
-        let endpoint = SparqlRemoteUpdateEndpoint(step.RemoteEndpoint.Single)
+        let endpointUri = step.RemoteEndpoint.Single.Endpoint.Single.Uri
+        let endpoint = SparqlRemoteUpdateEndpoint(endpointUri)
         let argsQuery = factory.CreateQuery step.ArgumentsQuery.Single
+        let update = factory.CreateUpdate step.SparqlUpdate.Single
         let args = select argsQuery data
-        let update = SparqlParameterizedString step.SparqlUpdate.Single //?
-        getCommands update args
-        |> String.concat ";/n"
-        |> endpoint.Update
+        let command = getCommands update args |> String.concat ";\n"
+        endpoint.Update command
         step.Next.Single.Node
 
     let coreSteps = [
@@ -61,7 +54,6 @@ type Steps (customSteps, factory: IFactory) =
         Classes.ConstructStep, constructStep
         Classes.ShaclStep, shaclStep
         Classes.RdfsInferenceStep, rdfsInferenceStep
-        Classes.UpdateStep, updateStep
         Classes.RemoteUpdateStep, remoteUpdateStep ]
 
     let customStep action node data = 
@@ -87,6 +79,9 @@ type Response = { StepNumber: int; StepUri: Uri; Status: Status; Data: IGraph }
 type ResumeRequest = { StepNumber: int; StepUri: Uri; Data: IGraph }
 
 type Workflow (configuration: IGraph, steps: Steps, workflow: IGraph) =
+    
+    do 
+        workflow.Merge configuration
 
     let final state = 
         let result = (Schema.FinalStep state.Step).Success.Single 
@@ -96,10 +91,7 @@ type Workflow (configuration: IGraph, steps: Steps, workflow: IGraph) =
         let nextStep = (steps.Get stepType) state.Step data
         { state with StepNumber = state.StepNumber+1; Step = nextStep }
 
-    let run (input: IGraph, state: State) =
-        let data = new Graph()
-        data.Merge configuration
-        data.Merge input
+    let run (data: IGraph, state: State) =
 
         let rec runSteps state =  
             let stepType = state.Step.Types.Single
@@ -118,6 +110,8 @@ type Workflow (configuration: IGraph, steps: Steps, workflow: IGraph) =
         { StepNumber = state.StepNumber; StepUri = state.Step.Uri; Status = status; Data = data }
 
     member _.Start(input: IGraph) =
+        input.Merge configuration
+
         let p = Schema.Process.Get(workflow).Single
         let state = { StepNumber = 0; Step = p.StartAt.Single.Node; Result = None }
         run (input, state)

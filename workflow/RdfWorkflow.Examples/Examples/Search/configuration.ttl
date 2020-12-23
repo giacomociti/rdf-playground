@@ -1,6 +1,8 @@
 ﻿
-@prefix w: <http://workflow.org/> .
 @prefix : <http://example.org/> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+
+:database a sd:Service ;
+    sd:endpoint <http://localhost:3030/test/sparql> .
 
 # docker run -d -p 3030:3030 -e ADMIN_PASSWORD=admin -e FUSEKI_DATASET_1=test stain/jena-fuseki
-<http://localhost:3030/test/sparql> a :Database .

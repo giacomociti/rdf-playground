@@ -1,10 +1,11 @@
 ﻿prefix : <http://example.org/>
+prefix sd: <http://www.w3.org/ns/sparql-service-description#>
 
 CONSTRUCT {
     ?result :about ?keyword .
 }
 WHERE {
-    ?database a :Database .
+    :database sd:endpoint ?database . # from configuration
     ?request a :SearchRequest ;
         :keyword ?keyword .
     SERVICE ?database {

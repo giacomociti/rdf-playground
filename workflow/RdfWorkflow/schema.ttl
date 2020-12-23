@@ -2,9 +2,9 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix schema: <http://schema.org/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
 @prefix : <http://workflow.org/> .
 
-#:Database a rdfs:Class .
 :Process a rdfs:Class .
 :Step a rdfs:Class .
 
@@ -19,8 +19,6 @@
 :ConstructStep a rdfs:Class ;
     rdfs:subClassOf :Step .
 :AskStep a rdfs:Class ;
-    rdfs:subClassOf :Step .
-:UpdateStep a rdfs:Class ;
     rdfs:subClassOf :Step .
 :RemoteUpdateStep a rdfs:Class ;
     rdfs:subClassOf :Step .
@@ -50,7 +48,7 @@
     schema:domainIncludes :AskStep, :ConstructStep ;
     rdfs:range xsd:string .
 :sparqlUpdate a rdf:Property ;
-    rdfs:domain :UpdateStep, :RemoteUpdateStep ;
+    rdfs:domain :RemoteUpdateStep ;
     rdfs:range xsd:string .
 :shapes a rdf:Property ;
     rdfs:domain :ShaclStep ;
@@ -60,6 +58,9 @@
     rdfs:range xsd:string .
 :remoteEndpoint a rdf:Property ;
     rdfs:domain :RemoteUpdateStep ;
-    rdfs:range xsd:string . # should be uri
+    rdfs:range sd:Service .
+sd:endpoint a rdf:Property ;
+    rdfs:domain sd:Service ;
+    rdfs:range xsd:anyURI .
 
 

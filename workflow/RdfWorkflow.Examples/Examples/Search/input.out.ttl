@@ -1,10 +1,13 @@
+@base <file:///C:/Repos/oss/rdf-playground/workflow/RdfWorkflow.Examples/Examples/Search/input.ttl>.
+
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-@prefix w: <http://workflow.org/>.
 @prefix : <http://example.org/>.
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#>.
 
-_:autos2 :keyword "logic",
+_:autos1 :keyword "logic",
                   "software";
          a :SearchRequest.
-<http://localhost:3030/test/sparql> a :Database.
+:database a sd:Service;
+          sd:endpoint <http://localhost:3030/test/sparql>.

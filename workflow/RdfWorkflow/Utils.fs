@@ -7,7 +7,6 @@ open VDS.RDF.Parsing
 open VDS.RDF.Shacl
 open System.IO
 open System.Collections.Generic
-open VDS.RDF.Update.Commands
 open VDS.RDF.Query.Inference
 
 type System.Collections.Generic.IEnumerable<'a> with
@@ -23,7 +22,7 @@ type INode with
 
 type IFactory =
    abstract member CreateQuery: string -> SparqlQuery
-   abstract member CreateUpdate: string -> ModifyCommand
+   abstract member CreateUpdate: string -> SparqlParameterizedString
    abstract member CreateShaclShape: string -> ShapesGraph
 
 
@@ -39,14 +38,13 @@ let parseTurtleText text =
 
 let factory (dict: IDictionary<_,string>) =
     let queryParser = SparqlQueryParser()
-    let updateParser = SparqlUpdateParser()
 
     { new IFactory with
         member _.CreateQuery name =
             dict.[name] |> queryParser.ParseFromString
            
         member _.CreateUpdate name =
-           (dict.[name] |> updateParser.ParseFromString).Commands.Single :?> ModifyCommand //ugly
+           dict.[name] |> SparqlParameterizedString
 
         member _.CreateShaclShape name =
            new ShapesGraph(dict.[name] |> parseTurtleText)
