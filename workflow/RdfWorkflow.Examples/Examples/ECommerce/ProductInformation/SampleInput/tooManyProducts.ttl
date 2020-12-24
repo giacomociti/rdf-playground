@@ -1,0 +1,6 @@
+﻿@prefix schema: <http://schema.org/>  .
+@prefix : <http://ecommerce.org/> .
+
+:p1 a schema:Product .
+:p2 a schema:Product .
+

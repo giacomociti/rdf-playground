@@ -22,6 +22,7 @@ let factory (queryFolder: DirectoryInfo) =
                 query 
         member _.CreateUpdate fileName =
             Path.Combine(queryFolder.FullName, fileName)
+            |> File.ReadAllText
             |> SparqlParameterizedString
 
         member _.CreateShaclShape fileName =

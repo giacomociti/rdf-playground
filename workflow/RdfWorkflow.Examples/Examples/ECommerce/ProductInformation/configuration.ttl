@@ -1,0 +1,11 @@
+﻿
+@prefix : <http://ecommerce.org/> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+
+:queryService a sd:Service ;
+    sd:endpoint <http://localhost:7200/repositories/ecommerce> .
+:updateService a sd:Service ;
+    sd:endpoint <http://localhost:7200/repositories/ecommerce/statements> .
+:graphProtocolService a sd:Service ;
+    sd:endpoint <http://localhost:7200/repositories/ecommerce/rdf-graphs> .
+

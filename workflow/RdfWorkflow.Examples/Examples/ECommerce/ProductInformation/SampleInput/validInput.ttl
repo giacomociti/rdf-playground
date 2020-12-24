@@ -1,0 +1,7 @@
+﻿@prefix schema: <http://schema.org/>  .
+@prefix : <http://ecommerce.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:p1 a schema:Product ;
+    rdfs:label "Pasta" ;
+    :version 2 .

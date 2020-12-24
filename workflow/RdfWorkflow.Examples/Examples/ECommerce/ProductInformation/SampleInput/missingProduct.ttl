@@ -1,0 +1,4 @@
+﻿@prefix schema: <http://schema.org/>  .
+
+schema:p1 a schema:Test .
+

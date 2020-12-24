@@ -6,6 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Examples\ECommerce\ProductInformation\SampleInput\tooManyProducts.ttl" />
+    <None Include="Examples\ECommerce\ProductInformation\SampleInput\validInput.ttl" />
+    <None Include="Examples\ECommerce\ProductInformation\SampleInput\missingProduct.ttl" />
+    <None Include="Examples\ECommerce\ProductInformation\configuration.ttl" />
+    <None Include="Examples\ECommerce\ProductInformation\inputValidation.ttl" />
+    <None Include="Examples\ECommerce\ProductInformation\checkVersion.rq" />
+    <None Include="Examples\ECommerce\ProductInformation\workflow.ttl" />
+    <None Include="Examples\ECommerce\schema.ttl" />
     <None Include="Examples\Search\configuration.ttl" />
     <None Include="Examples\Search\input.ttl" />
     <None Include="Examples\Search\retrieval.rq" />
@@ -13,8 +21,6 @@
     <None Include="Examples\Search\workflow.ttl" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <ProjectReference Include="..\RdfWorkflow\RdfWorkflow.fsproj" />

@@ -22,6 +22,8 @@
     rdfs:subClassOf :Step .
 :RemoteUpdateStep a rdfs:Class ;
     rdfs:subClassOf :Step .
+:RemoteUpdateGraphStep a rdfs:Class ;
+    rdfs:subClassOf :Step .
 
 :startAt a rdf:Property ;
     rdfs:domain :Workflow ;
@@ -57,10 +59,12 @@
     rdfs:domain :RemoteUpdateStep ;
     rdfs:range xsd:string .
 :remoteEndpoint a rdf:Property ;
-    rdfs:domain :RemoteUpdateStep ;
+    schema:domainIncludes :RemoteUpdateStep, :RemoteUpdateGraphStep ;
     rdfs:range sd:Service .
 sd:endpoint a rdf:Property ;
     rdfs:domain sd:Service ;
     rdfs:range xsd:anyURI .
-
-
+:versionProperty a rdf:Property ;
+    rdfs:comment "IRI of a property used to determine graph name and version, assuming there is one triple ?graphUri <versionProperty> ?version" ;
+    rdfs:domain :RemoteUpdateGraphStep ;
+    rdfs:range xsd:anyURI .

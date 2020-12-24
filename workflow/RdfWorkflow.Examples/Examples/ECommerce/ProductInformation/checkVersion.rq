@@ -1,0 +1,11 @@
+prefix : <http://ecommerce.org/> 
+prefix sd: <http://www.w3.org/ns/sparql-service-description#>
+
+ASK
+WHERE {
+	?p :version ?v .
+	:queryService sd:endpoint ?queryService . 
+    SERVICE ?queryService {
+		GRAPH ?p { ?p :version ?v }	
+	}
+}

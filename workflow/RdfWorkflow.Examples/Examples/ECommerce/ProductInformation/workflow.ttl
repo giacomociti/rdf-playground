@@ -1,0 +1,25 @@
+﻿@prefix w: <http://workflow.org/> .
+@prefix : <http://ecommerce.org/> .
+
+:storeProductInformation a w:Workflow ;
+    w:startAt :inputValidation .
+:inputValidation a w:ShaclStep ;
+    w:shapes "inputValidation.ttl" ;
+    w:nextOnValid :updateGraph ;
+    w:nextOnInvalid :invalidInput .
+:updateGraph a w:RemoteUpdateGraphStep ;
+    w:remoteEndpoint :updateService ;
+    w:versionProperty :version ;
+    w:next :checkVersion .
+:checkVersion a w:AskStep ;
+    w:sparqlQuery "checkVersion.rq" ;
+    w:nextOnTrue  :updated ;
+    w:nextOnFalse :obsolete .
+:invalidInput a w:FinalStep ;
+    w:success false .
+:obsolete a w:FinalStep ;
+    w:success false .
+:updated a w:FinalStep ;
+    w:success true .
+
+
