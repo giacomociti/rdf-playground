@@ -1,4 +1,4 @@
-﻿
+﻿@PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> .
 @PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @PREFIX schema: <http://schema.org/> .
@@ -7,4 +7,7 @@
 schema:Product a rdfs:Class .
 schema:gtin a rdf:Property ;
 	schema:domainIncludes schema:Product ;
-	schema:rangeIncludes schema:Text .
+	schema:rangeIncludes xsd:string .
+schema:category a rdf:Property ;
+	schema:domainIncludes schema:Product ;
+	schema:rangeIncludes xsd:string .

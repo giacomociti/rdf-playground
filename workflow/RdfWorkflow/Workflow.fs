@@ -6,6 +6,7 @@ open Utils
 open VDS.RDF
 open VDS.RDF.Update
 open VDS.RDF.Writing
+open VDS.RDF.Writing.Formatting
 
 type Schema = GraphProvider<Schema = "schema.ttl">
 type Classes = UriProvider<"schema.ttl", SchemaQuery.RdfsClasses>
@@ -43,7 +44,7 @@ type Steps (customSteps, factory: IFactory) =
         let versionUri = step.VersionProperty.Single.Uri
         let t = data.GetTriplesWithPredicate(versionUri).Single
         let graphUri = t.Subject.Uri
-        let version = (t.Object :?> ILiteralNode).Value // TODO improve
+        let version = NTriplesFormatter().Format(t.Object)
         let w = NTriplesWriter()
         let sw = new IO.StringWriter()
         sw.WriteLine $"WITH <{graphUri}>"

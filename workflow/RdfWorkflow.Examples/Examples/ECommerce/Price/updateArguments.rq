@@ -1,0 +1,12 @@
+﻿prefix schema: <http://schema.org/> 
+
+SELECT $uri $gtin $price $priceCurrency $validFrom $validThrough
+WHERE {
+	BIND (URI(concat("http://ecommerce.org/offer/", $gtin)) as ?uri)
+	?s a schema:Offer ;
+		schema:gtin $gtin ;
+		schema:price $price ;
+		schema:priceCurrency $priceCurrency ;
+		schema:validFrom $validFrom ;
+		schema:validThrough $validThrough .
+}

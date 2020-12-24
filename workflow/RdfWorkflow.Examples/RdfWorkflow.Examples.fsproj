@@ -6,10 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Examples\ECommerce\configuration.ttl" />
+    <None Include="Examples\ECommerce\Price\updateArguments.rq" />
+    <None Include="Examples\ECommerce\Price\update.rq" />
+    <None Include="Examples\ECommerce\Price\inputValidation.ttl" />
+    <None Include="Examples\ECommerce\Price\SampleInput\validInput.ttl" />
+    <None Include="Examples\ECommerce\Price\workflow.ttl" />
     <None Include="Examples\ECommerce\ProductInformation\SampleInput\tooManyProducts.ttl" />
     <None Include="Examples\ECommerce\ProductInformation\SampleInput\validInput.ttl" />
     <None Include="Examples\ECommerce\ProductInformation\SampleInput\missingProduct.ttl" />
-    <None Include="Examples\ECommerce\ProductInformation\configuration.ttl" />
     <None Include="Examples\ECommerce\ProductInformation\inputValidation.ttl" />
     <None Include="Examples\ECommerce\ProductInformation\checkVersion.rq" />
     <None Include="Examples\ECommerce\ProductInformation\workflow.ttl" />

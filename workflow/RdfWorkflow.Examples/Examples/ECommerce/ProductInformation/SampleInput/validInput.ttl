@@ -4,4 +4,6 @@
 
 :p1 a schema:Product ;
     rdfs:label "Pasta" ;
-    :version 2 .
+    schema:gtin "12345678" ;
+    schema:category "Italian Food" ;
+    :version 5 .

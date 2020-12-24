@@ -1,0 +1,17 @@
+﻿@prefix schema: <http://schema.org/>  .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <http://ecommerce.org/> .
+
+[] a schema:Offer ;
+	schema:gtin "12345678" ;
+	schema:price 100.0 ;
+	schema:priceCurrency "EUR" ;
+	schema:validFrom "2020-10-31"^^xsd:date ;
+	schema:validThrough "2021-10-31"^^xsd:date .
+
+[] a schema:Offer ;
+	schema:gtin "123456789" ;
+	schema:price 97.5 ;
+	schema:priceCurrency "EUR" ;
+	schema:validFrom "2020-10-31"^^xsd:date ;
+	schema:validThrough "2020-10-31"^^xsd:date .

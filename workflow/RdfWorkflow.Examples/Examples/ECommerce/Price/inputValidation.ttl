@@ -4,30 +4,34 @@
 @prefix schema: <http://schema.org/>  .
 @prefix : <http://ecommerce.org/> .
 
-:ProductCountShape a sh:NodeShape ;
-    sh:targetNode schema:Product ;
-    sh:property [
-        sh:path [ sh:inversePath rdf:type ] ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-    ] .
-
-:ProductShape a sh:NodeShape ;
-    sh:targetClass schema:Product ;
-    sh:property [
-        sh:path :version ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:integer ;
-    ] ;
+:OfferShape a sh:NodeShape ;
+    sh:targetClass schema:Offer ;
     sh:property [
         sh:path schema:gtin ;
         sh:minCount 1 ;
         sh:maxCount 1 ;
-        sh:pattern "\\d{8,14}" ; 
+        sh:pattern "\\d{8,14}" ;
     ] ;
     sh:property [
-        sh:path schema:category ;
+        sh:path schema:price ;
+        sh:datatype xsd:decimal ;
         sh:minCount 1 ;
-        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path schema:priceCurrency ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+    ] ;
+    sh:property [
+        sh:path schema:validFrom ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:dataType xsd:date ;
+    ] ;
+    sh:property [
+        sh:path schema:validThrough ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
     ] .

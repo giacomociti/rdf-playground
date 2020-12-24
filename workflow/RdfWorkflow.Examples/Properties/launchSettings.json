@@ -2,8 +2,8 @@
   "profiles": {
     "RdfWorkflow.Examples": {
       "commandName": "Project",
-      "commandLineArgs": "configuration.ttl workflow.ttl SampleInput\\validInput.ttl",
-      "workingDirectory": "C:\\Repos\\oss\\rdf-playground\\workflow\\RdfWorkflow.Examples\\Examples\\Ecommerce\\ProductInformation"
+      "commandLineArgs": "..\\configuration.ttl workflow.ttl SampleInput\\validInput.ttl",
+      "workingDirectory": "C:\\Repos\\oss\\rdf-playground\\workflow\\RdfWorkflow.Examples\\Examples\\Ecommerce\\Price"
     }
   }
 }

@@ -1,0 +1,20 @@
+﻿prefix schema: <http://schema.org/> 
+prefix : <http://ecommerce.org/> 
+
+WITH :price
+DELETE { ?s ?p ?o }
+INSERT {
+	$uri a schema:Offer ;
+		schema:gtin $gtin ;
+		schema:price $price ;
+		schema:priceCurrency $priceCurrency ;
+		schema:validFrom $validFrom ;
+		schema:validThrough $validThrough .
+}
+WHERE {
+	OPTIONAL {
+		?s a schema:Offer ;
+			schema:gtin $gtin ;
+			?p ?o .
+	}
+}
