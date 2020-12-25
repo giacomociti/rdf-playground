@@ -23,7 +23,7 @@ type INode with
 type IFactory =
    abstract member CreateQuery: string -> SparqlQuery
    abstract member CreateUpdate: string -> SparqlParameterizedString
-   abstract member CreateShaclShape: string -> ShapesGraph
+   abstract member CreateGraph: string -> IGraph
 
 
 let parseTurtleFile path =
@@ -46,8 +46,8 @@ let factory (dict: IDictionary<_,string>) =
         member _.CreateUpdate name =
            dict.[name] |> SparqlParameterizedString
 
-        member _.CreateShaclShape name =
-           new ShapesGraph(dict.[name] |> parseTurtleText)
+        member _.CreateGraph name =
+           (parseTurtleText dict.[name]) :> IGraph
     }
 
 let construct (query: SparqlQuery) (input: IGraph) =
@@ -59,8 +59,15 @@ let ask (query: SparqlQuery) (input: IGraph) =
 let shacl (shapes: ShapesGraph) (input: IGraph) =
     shapes.Validate input
     
-let infer (input: IGraph) =
-    RdfsReasoner().Apply(input)
+let merge (g1: IGraph) (g2: IGraph) =
+    g1.Merge g2 
+    g1
+
+let infer schemas (input: IGraph) =
+    let reasoner = RdfsReasoner()
+    if not (Seq.isEmpty schemas)
+    then reasoner.Initialise (Seq.reduce merge schemas)
+    reasoner.Apply input
 
 let select (query: SparqlQuery) (input: IGraph) =
     input.ExecuteQuery query :?> SparqlResultSet

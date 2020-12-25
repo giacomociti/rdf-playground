@@ -25,11 +25,11 @@ let factory (queryFolder: DirectoryInfo) =
             |> File.ReadAllText
             |> SparqlParameterizedString
 
-        member _.CreateShaclShape fileName =
+        member _.CreateGraph fileName =
             let graph = new Graph()
             let file = Path.Combine(queryFolder.FullName, fileName)
             FileLoader.Load(graph, file)
-            new ShapesGraph(graph)
+            graph :> IGraph
 
     }
 let runFromFiles (configuration: FileInfo) (workflow: FileInfo) (input: FileInfo) =

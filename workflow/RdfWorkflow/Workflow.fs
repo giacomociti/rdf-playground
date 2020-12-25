@@ -28,7 +28,8 @@ type Steps (customSteps, factory: IFactory) =
 
     let shaclStep node data =
         let step = Schema.ShaclStep node
-        let result = shacl (factory.CreateShaclShape step.Shapes.Single) data
+        let shapes = new ShapesGraph(factory.CreateGraph step.Shapes.Single)
+        let result = shacl shapes data
         if result.Conforms
         then step.NextOnValid.Single.Node
         else
@@ -43,7 +44,8 @@ type Steps (customSteps, factory: IFactory) =
 
     let rdfsInferenceStep node data =
         let step = Schema.RdfsInferenceStep node
-        infer data
+        let schemas = step.Schema |> Seq.map factory.CreateGraph
+        infer schemas data
         step.Next.Single.Node
 
     let remoteUpdateGraphStep node (data: IGraph) =
@@ -117,15 +119,13 @@ type ResumeRequest = { StepNumber: int; StepUri: Uri; Data: IGraph }
 
 type Workflow (configuration: IGraph, steps: Steps, workflow: IGraph) =
     let validate() =
-        let asm = System.Reflection.Assembly.GetExecutingAssembly()
-        let dir = System.IO.FileInfo(asm.Location).Directory.FullName
-        let shapes = IO.Path.Combine(dir, "shapes.ttl") |> Utils.parseTurtleFile
-        let schema = IO.Path.Combine(dir, "schema.ttl") |> Utils.parseTurtleFile
-        let rdfs = VDS.RDF.Query.Inference.RdfsReasoner()
-        rdfs.Initialise(schema)
-        rdfs.Apply(workflow)
+        let asm = Reflection.Assembly.GetExecutingAssembly()
+        let dir = IO.FileInfo(asm.Location).Directory.FullName
+        let parse file = IO.Path.Combine(dir, file) |> Utils.parseTurtleFile
+        let shapes, schema = parse "shapes.ttl", parse "schema.ttl"
+        infer [schema] workflow
         let shapesGraph = new ShapesGraph(shapes)
-        let report = Utils.shacl shapesGraph workflow
+        let report = shacl shapesGraph workflow
         if not report.Conforms
         then failwithf "Invalid Workflow: %A" report.Results
         

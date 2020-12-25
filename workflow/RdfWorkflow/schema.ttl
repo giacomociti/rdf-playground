@@ -46,6 +46,9 @@
 :nextOnInvalid a rdf:Property ;
     rdfs:domain :ShaclStep ;
     rdfs:range :Step .
+:schema a rdf:Property ;
+    rdfs:domain :RdfsInferenceStep ;
+    rdfs:range xsd:string .
 :sparqlQuery a rdf:Property ;
     schema:domainIncludes :AskStep, :ConstructStep ;
     rdfs:range xsd:string .
