@@ -1,5 +1,11 @@
 ﻿namespace RdfWorkflow
 
+// TODO
+// queries and commands should be parsed at most once
+// use InMemoryManager to keeep separate graphs for input, config, temp, output...
+// plug additional services (persistent resume token, tracing..)
+
+
 open System
 open Iride
 open Utils
@@ -7,6 +13,7 @@ open VDS.RDF
 open VDS.RDF.Update
 open VDS.RDF.Writing
 open VDS.RDF.Writing.Formatting
+open VDS.RDF.Shacl
 
 type Schema = GraphProvider<Schema = "schema.ttl">
 type Classes = UriProvider<"schema.ttl", SchemaQuery.RdfsClasses>
@@ -22,9 +29,9 @@ type Steps (customSteps, factory: IFactory) =
     let shaclStep node data =
         let step = Schema.ShaclStep node
         let result = shacl (factory.CreateShaclShape step.Shapes.Single) data
-        if result.Conforms 
+        if result.Conforms
         then step.NextOnValid.Single.Node
-        else 
+        else
             data.Merge result.Graph
             step.NextOnInvalid.Single.Node
 
@@ -64,7 +71,7 @@ type Steps (customSteps, factory: IFactory) =
         endpoint.Update command
         step.Next.Single.Node
 
-    let remoteUpdateStep node (data: IGraph) = 
+    let remoteUpdateStep node (data: IGraph) =
         let step = Schema.RemoteUpdateStep node
         let endpointUri = step.RemoteEndpoint.Single.Endpoint.Single.Uri
         let endpoint = SparqlRemoteUpdateEndpoint(endpointUri)
@@ -84,11 +91,11 @@ type Steps (customSteps, factory: IFactory) =
         Classes.RemoteUpdateGraphStep, remoteUpdateGraphStep
         Classes.RemoteUpdateStep, remoteUpdateStep ]
 
-    let customStep action node data = 
+    let customStep action node data =
         action data
         (Schema.Step node).Next.Single.Node
 
-    let additionalSteps = 
+    let additionalSteps =
         customSteps
         |> List.map (fun (stepUri, action) -> stepUri, customStep action )
 
@@ -99,38 +106,58 @@ type Steps (customSteps, factory: IFactory) =
         | true, step -> step
         | _ -> failwith $"Unknown step {stepTypeUri}"
 
-type State = { StepNumber: int; Step: INode; Result: bool option } 
+type State = { StepNumber: int; Step: INode; Result: bool option }
 
 type Status = Succeded | Failed | Suspended
 
 type Response = { StepNumber: int; StepUri: Uri; Status: Status; Data: IGraph }
 type ResumeRequest = { StepNumber: int; StepUri: Uri; Data: IGraph }
 
-type Workflow (configuration: IGraph, steps: Steps, workflow: IGraph) =
-    
-    do 
-        workflow.Merge configuration
 
-    let final state = 
-        let result = (Schema.FinalStep state.Step).Success.Single 
+
+type Workflow (configuration: IGraph, steps: Steps, workflow: IGraph) =
+    let validate() =
+        let asm = System.Reflection.Assembly.GetExecutingAssembly()
+        let dir = System.IO.FileInfo(asm.Location).Directory.FullName
+        let shapes = IO.Path.Combine(dir, "shapes.ttl") |> Utils.parseTurtleFile
+        let schema = IO.Path.Combine(dir, "schema.ttl") |> Utils.parseTurtleFile
+        let rdfs = VDS.RDF.Query.Inference.RdfsReasoner()
+        rdfs.Initialise(schema)
+        rdfs.Apply(workflow)
+        let shapesGraph = new ShapesGraph(shapes)
+        let report = Utils.shacl shapesGraph workflow
+        if not report.Conforms
+        then failwithf "Invalid Workflow: %A" report.Results
+        
+    do
+        workflow.Merge configuration
+        validate()
+
+    let final state =
+        let result = (Schema.FinalStep state.Step).Success.Single
         { state with StepNumber = state.StepNumber+1; Result = Some result }
 
     let next state stepType data =
         let nextStep = (steps.Get stepType) state.Step data
         { state with StepNumber = state.StepNumber+1; Step = nextStep }
 
+    let getStepType state =
+        state.Step.Types
+        |> Seq.filter (fun t -> t <> Classes.Step)
+        |> Seq.exactlyOne
+
     let run (data: IGraph, state: State) =
 
-        let rec runSteps state =  
-            let stepType = state.Step.Types.Single
+        let rec runSteps state =
+            let stepType = getStepType state
             if stepType = Classes.YieldStep then state
             elif stepType = Classes.FinalStep then final state
             else runSteps (next state stepType data)
-                
+
         runSteps state, data
 
     let response (state, data) =
-        let status = 
+        let status =
              match state.Result with
              | None -> Suspended
              | Some true -> Succeded
@@ -150,3 +177,4 @@ type Workflow (configuration: IGraph, steps: Steps, workflow: IGraph) =
         let state = {StepNumber = request.StepNumber+1; Step = yieldStep.Next.Single.Node; Result = None}
         run (request.Data, state)
         |> response
+

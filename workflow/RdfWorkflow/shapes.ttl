@@ -1,0 +1,140 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#> .
+@prefix : <http://workflow.org/> .
+
+:WorkflowShape a sh:NodeShape ;
+    sh:targetClass :Workflow ;
+    sh:property [
+        sh:path :startAt ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class :Step ;
+    ] .
+:FinalStepShape a sh:NodeShape ;
+    sh:targetClass :FinalStep ;
+    sh:property [
+        sh:path :success ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:dataType xsd:boolean ;
+    ] .
+:YieldStepShape a sh:NodeShape ;
+    sh:targetClass :YieldStep ;
+    sh:property [
+        sh:path :next ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class :Step ;
+    ] .
+:RdfsInferenceStepShape a sh:NodeShape ;
+    sh:targetClass :RdfsInferenceStep ;
+    sh:property [
+        sh:path :next ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class :Step ;
+    ] .
+:ConstructStepShape a sh:NodeShape ;
+    sh:targetClass :ConstructStep ;
+     sh:property [
+        sh:path :sparqlQuery ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:dataType xsd:string ;
+    ] ;
+    sh:property [
+        sh:path :next ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class :Step ;
+    ] .
+:AskStepShape a sh:NodeShape ;
+    sh:targetClass :AskStep ;
+     sh:property [
+        sh:path :sparqlQuery ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:dataType xsd:string ;
+    ] ;
+    sh:property [
+        sh:path :nextOnTrue ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class :Step ;
+    ] ;
+    sh:property [
+        sh:path :nextOnFalse ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class :Step ;
+    ] .
+:ShaclStepShape a sh:NodeShape ;
+    sh:targetClass :ShaclStep ;
+    sh:property [
+        sh:path :shapes ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:dataType xsd:string ;
+    ] ;
+    sh:property [
+        sh:path :nextOnValid ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class :Step ;
+    ] ;
+        sh:property [
+        sh:path :nextOnInvalid ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class :Step ;
+    ] .
+:RemoteUpdateStepShape a sh:NodeShape ;
+    sh:targetClass :RemoteUpdateStep ;
+    sh:property [
+        sh:path :remoteEndpoint ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class sd:Service ;
+    ] ;
+    sh:property [
+        sh:path :argumentsQuery ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:dataType xsd:string ;
+    ] ;
+    sh:property [
+        sh:path :sparqlUpdate ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:dataType xsd:string ;
+    ] ;
+    sh:property [
+        sh:path :next ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class :Step ;
+    ] .
+:RemoteUpdateGraphStepShape a sh:NodeShape ;
+    sh:targetClass :RemoteUpdateGraphStep ;
+    sh:property [
+        sh:path :remoteEndpoint ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class sd:Service ;
+    ] ;
+    sh:property [
+        sh:path :versionProperty ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:dataType xsd:anyURI ;
+    ] ;
+    sh:property [
+        sh:path :next ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class :Step ;
+    ] .
+

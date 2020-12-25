@@ -6,10 +6,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="schema.ttl" />
     <Compile Include="Utils.fs" />
     <Compile Include="Workflow.fs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="schema.ttl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="shapes.ttl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>  
 
   <ItemGroup>
     <PackageReference Include="Iride" Version="0.4.0" />

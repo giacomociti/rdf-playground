@@ -82,7 +82,6 @@ let ``Shacl`` () =
     Assert.Equal(Status.Succeded, response.Status)
     Assert.Equal(2, response.StepNumber)
     Assert.Equal(Uri "http://example.org/ok", response.StepUri)
-    Assert.Equal(3, response.Data.Triples.Count)
 
 [<Fact>]
 let ``Yield and resume`` () =
