@@ -94,11 +94,10 @@ type FusekiTest(fixture: FusekiFixture) =
                 sd:endpoint <http://localhost:3030/test> .
         """
 
-        let f = 
-          [ "args.rq", args
-            "update.rq", update
-          ] |> dict |> Utils.factory
-        let w = Workflow(config, Steps([], f), workflow)
+        let textResolver = Utils.resolve [ 
+            "args.rq", args
+            "update.rq", update ] 
+        let w = Workflow(config, Steps([], textResolver), workflow)
 
         let response = w.Start(input)
 

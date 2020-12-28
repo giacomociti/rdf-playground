@@ -1,39 +1,11 @@
 ﻿open System.IO
-open System.Collections.Generic
 open VDS.RDF
-open VDS.RDF.Query
-open VDS.RDF.Shacl
-open VDS.RDF.Parsing
 open Utils
 open RdfWorkflow
 
-let factory (queryFolder: DirectoryInfo) =
-    let queries = Dictionary<_,_>()
-    let parser = SparqlQueryParser()
-    { new IFactory with
-        member _.CreateQuery fileName =
-            match queries.TryGetValue fileName with
-            | true, query -> query
-            | _ ->
-                let query = 
-                    Path.Combine(queryFolder.FullName, fileName)
-                    |> parser.ParseFromFile
-                queries.Add(fileName, query)
-                query 
-        member _.CreateUpdate fileName =
-            Path.Combine(queryFolder.FullName, fileName)
-            |> File.ReadAllText
-            |> SparqlParameterizedString
-
-        member _.CreateGraph fileName =
-            let graph = new Graph()
-            let file = Path.Combine(queryFolder.FullName, fileName)
-            FileLoader.Load(graph, file)
-            graph :> IGraph
-
-    }
 let runFromFiles (configuration: FileInfo) (workflow: FileInfo) (input: FileInfo) =
-    let steps = Steps([], factory workflow.Directory)
+    let textResolver x = Path.Combine(workflow.Directory.FullName, x) |> File.ReadAllText
+    let steps = Steps([], textResolver)
     let configuration = parseTurtleFile configuration.FullName
     let workflow = parseTurtleFile workflow.FullName
     let input = parseTurtleFile input.FullName

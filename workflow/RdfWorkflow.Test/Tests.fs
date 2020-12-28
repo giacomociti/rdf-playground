@@ -11,8 +11,8 @@ let ``Failure`` () =
     let cfg = new Graph()
     let s1 = "ASK WHERE { ?input a <http://example.org/test> }"
     let workflowGraph = Utils.parseTurtleFile "workflow1.ttl"
-    let f = dict ["s1.rq", s1] |> Utils.factory
-    let w = Workflow(cfg, Steps([], f), workflowGraph)
+    let textResolver = Utils.resolve ["s1.rq", s1]
+    let w = Workflow(cfg, Steps([], textResolver), workflowGraph)
     let input = new Graph()
 
     let response = w.Start(input)
@@ -26,8 +26,8 @@ let ``Success`` () =
     let cfg = new Graph()
     let s1 = "ASK WHERE { ?input a <http://example.org/test> }"
     let workflowGraph = Utils.parseTurtleFile "workflow1.ttl"
-    let f = dict ["s1.rq", s1] |> Utils.factory
-    let w = Workflow(cfg, Steps([], f), workflowGraph)
+    let textResolver = Utils.resolve ["s1.rq", s1]
+    let w = Workflow(cfg, Steps([], textResolver), workflowGraph)
     let input = new Graph()
     let subject = input.CreateBlankNode()
     let predicate = input.CreateUriNode(UriFactory.Create RdfSpecsHelper.RdfType)
@@ -69,8 +69,8 @@ let ``Shacl`` () =
             sh:minCount 1 ;
         ] .
     """
-    let f = dict ["s1.ttl", s1] |> Utils.factory
-    let w = Workflow(new Graph(), Steps([], f), workflow)
+    let textResolver = Utils.resolve ["s1.ttl", s1]
+    let w = Workflow(new Graph(), Steps([], textResolver), workflow)
     let validInput = new Graph()
 
     let subject = validInput.CreateBlankNode()
@@ -87,9 +87,8 @@ let ``Shacl`` () =
 let ``Yield and resume`` () =
     let cfg = new Graph()
     let workflowGraph = Utils.parseTurtleFile "workflow2.ttl"
-    let f = dict [] |> Utils.factory
 
-    let w = Workflow(cfg, Steps([], f), workflowGraph)
+    let w = Workflow(cfg, Steps([], id), workflowGraph)
     
     let response = w.Start(new Graph())
     Assert.Equal(Status.Suspended, response.Status)
@@ -115,10 +114,8 @@ let ``Inference`` () =
     :ok a w:FinalStep ;
         w:success true .
     """
-
-    let f = dict [] |> Utils.factory
     
-    let w = Workflow(cfg, Steps([], f), workflowGraph)
+    let w = Workflow(cfg, Steps([], id), workflowGraph)
         
     let input = new Graph()
     let subject = input.CreateBlankNode()
@@ -136,12 +133,11 @@ let ``Inference`` () =
 let ``Custom step`` () =
     let cfg = new Graph()
     let workflowGraph = Utils.parseTurtleFile "workflow3.ttl"
-    let f = dict [] |> Utils.factory
     let mutable called = false
     let myStep _ = called <- true
     let myStepUri = Uri "http://example.org/MyStep"
     let customSteps = [myStepUri, myStep]
-    let w = Workflow(cfg, Steps(customSteps, f), workflowGraph)
+    let w = Workflow(cfg, Steps(customSteps, id), workflowGraph)
     
     let response = w.Start(new Graph())
     Assert.Equal(Status.Succeded, response.Status)

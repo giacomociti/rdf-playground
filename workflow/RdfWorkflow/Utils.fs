@@ -6,8 +6,8 @@ open VDS.RDF.Update
 open VDS.RDF.Parsing
 open VDS.RDF.Shacl
 open System.IO
-open System.Collections.Generic
 open VDS.RDF.Query.Inference
+open Iride
 
 type System.Collections.Generic.IEnumerable<'a> with
     member this.Single = Seq.exactlyOne this
@@ -20,11 +20,8 @@ type INode with
         this.Graph.GetTriplesWithSubjectPredicate(this, typeNode) 
         |> Seq.map (fun x -> x.Object.Uri)
 
-type IFactory =
-   abstract member CreateQuery: string -> SparqlQuery
-   abstract member CreateUpdate: string -> SparqlParameterizedString
-   abstract member CreateGraph: string -> IGraph
-
+type Resource with
+    member this.Uri = this.Node.Uri
 
 let parseTurtleFile path =
     let graph = new Graph()
@@ -34,21 +31,17 @@ let parseTurtleFile path =
 let parseTurtleText text =
     let graph = new Graph()
     TurtleParser().Load(graph, new StringReader(text))
-    graph
+    graph :> IGraph
 
-let factory (dict: IDictionary<_,string>) =
-    let queryParser = SparqlQueryParser()
+let parseQuery (text:string) =
+    SparqlQueryParser().ParseFromString text
 
-    { new IFactory with
-        member _.CreateQuery name =
-            dict.[name] |> queryParser.ParseFromString
-           
-        member _.CreateUpdate name =
-           dict.[name] |> SparqlParameterizedString
-
-        member _.CreateGraph name =
-           (parseTurtleText dict.[name]) :> IGraph
-    }
+let resolve pairs =
+    let d = dict pairs
+    fun x -> 
+        match d.TryGetValue x with
+        | true, value -> value
+        | _ -> x
 
 let construct (query: SparqlQuery) (input: IGraph) =
     input.ExecuteQuery query :?> IGraph
