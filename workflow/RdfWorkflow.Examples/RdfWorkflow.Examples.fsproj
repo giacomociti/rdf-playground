@@ -6,11 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Examples\ECommerce\Schema.fs" />
     <None Include="Examples\ECommerce\configuration.ttl" />
+    <Compile Include="Examples\ECommerce\Price\calc.fs" />
     <None Include="Examples\ECommerce\Price\updateArguments.rq" />
     <None Include="Examples\ECommerce\Price\update.rq" />
     <None Include="Examples\ECommerce\Price\inputValidation.ttl" />
-    <None Include="Examples\ECommerce\Price\SampleInput\validInput.ttl" />
+    <None Include="Examples\ECommerce\Price\SampleInput\validInput.ttl">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Examples\ECommerce\Price\workflow.ttl" />
     <None Include="Examples\ECommerce\ProductInformation\SampleInput\tooManyProducts.ttl" />
     <None Include="Examples\ECommerce\ProductInformation\SampleInput\validInput.ttl" />

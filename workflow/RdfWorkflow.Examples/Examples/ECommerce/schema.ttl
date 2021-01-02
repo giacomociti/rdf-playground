@@ -1,13 +1,27 @@
-﻿@PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> .
-@PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@PREFIX schema: <http://schema.org/> .
-@PREFIX : <http://ecommerce.org/> .
+﻿@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix : <http://ecommerce.org/> .
 
 schema:Product a rdfs:Class .
+schema:Offer a rdfs:Class .
+
 schema:gtin a rdf:Property ;
-	schema:domainIncludes schema:Product ;
+	schema:domainIncludes schema:Product , schema:Offer ;
 	schema:rangeIncludes xsd:string .
 schema:category a rdf:Property ;
 	schema:domainIncludes schema:Product ;
 	schema:rangeIncludes xsd:string .
+schema:price a rdf:Property ;
+	schema:domainIncludes schema:Offer ;
+	schema:rangeIncludes xsd:decimal .
+schema:priceCurrency a rdf:Property ;
+	schema:domainIncludes schema:Offer ;
+	schema:rangeIncludes xsd:string .
+schema:validFrom a rdf:Property ;
+	schema:domainIncludes schema:Offer ;
+	schema:rangeIncludes xsd:date .	
+schema:validThrough a rdf:Property ;
+	schema:domainIncludes schema:Offer ;
+	schema:rangeIncludes xsd:date .
