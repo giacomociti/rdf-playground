@@ -1,0 +1,14 @@
+﻿#PREFIX bd: <http://www.bigdata.com/rdf#>
+PREFIX wd: <http://www.wikidata.org/entity/>
+PREFIX wdt: <http://www.wikidata.org/prop/direct/>
+#PREFIX wikibase: <http://wikiba.se/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?LIT_cityLabel ?NUM_population WHERE {
+  ?city wdt:P31 wd:Q515; # instance of city
+        wdt:P17 wd:Q38; # in country Italy
+        rdfs:label ?LIT_cityLabel;
+        wdt:P1082 ?NUM_population.
+  FILTER (LANG(?LIT_cityLabel) = "it")
+}
+LIMIT $INT_Limit
