@@ -1,7 +1,7 @@
-Programming with RDF
+Maybe RDF
 ====================
 ## A provoking claim
-As a software anarchitect I like to challenge the status quo:
+As a software anarchitect, I like to challenge the status quo:
 I propose to use [RDF](https://www.w3.org/TR/rdf11-primer/)
 and [SPARQL](https://www.w3.org/TR/sparql11-overview/)
 for the core domain logic of business applications.
@@ -14,22 +14,22 @@ while a workflow engine can orchestrate the processing steps.
 OO classes _hide_ information. They do so to pursue modularity and tame complexity,
 but [hiding information](https://en.wikipedia.org/wiki/Information_hiding) may not be
 a good idea when building information processing applications.
-More concrete structures like algebraic data types can model information explicitly and in fact are becoming popular for domain modeling.
+More concrete structures, like algebraic data types, can model information explicitly
+and in fact are becoming popular for domain modeling.
+
 Still, I contend that a logical framework like RDF shines at representing knowledge about a domain.
-Rich Hickey's provoking [talks](https://www.youtube.com/watch?v=YR5WdGrpoug&list=PLZdCLR02grLrEwKaZv-5QbUzK0zGKOOcr) may upset my F# friends, but I think he has a point.
+Rich Hickey's provoking [talks](https://www.youtube.com/watch?v=YR5WdGrpoug&list=PLZdCLR02grLrEwKaZv-5QbUzK0zGKOOcr) may upset my F# friends, but I think he has a point: explicit, precise data types may lead to rigid designs (to be clear, [this article](https://lexi-lambda.github.io/blog/2020/01/19/no-dynamic-type-systems-are-not-inherently-more-open/) explains that the culprit for a rigid design is not the type system).
 
-Explicit, precise data types may lead to rigid designs.
-Moreover, common advice is to focus on functions and not on data:
-domain modeling should describe the _dynamic_ behavior of a system rather than static information.
+In domain modeling, common advice is to focus on functions and not on data: we should describe the _dynamic_ behavior of a system rather than static information.
 This applies both to OO (classes are collections of functions) and FP (pure functions still have a
-dynamic, computational sense even though we like to think them as static input-output mappings).
+dynamic, computational sense even though we like to think of them as static input-output mappings).
 
-Often this advice is neglected. Partly for historical reasons stemming from relational databases dominance.
+Often this advice is neglected. Partly for historical reasons stemming from the dominance of relational databases.
 Partly because the value of many business applications lies more in the data than in their processing steps.
 My endorsement of RDF is limited to this kind of applications, for which other declarative approaches,
 SQL-like or Prolog-like, may work as well.
 
-## Pragmatics
+## Proof of Concept
 I admit this is cheap philosophy and my claim is not backed by real world experience, so I decided to get a feel of what it means to build an application with a core domain based on RDF.
 As a proof of concept, I hacked a [toy](https://github.com/giacomociti/rdf-playground/blob/master/workflow/RdfWorkflow/Workflow.fs) workflow engine in a few lines of F# code.
 It orchestrates the steps of workflow definitions like the following one (expressed as RDF in Turtle notation):
@@ -103,8 +103,8 @@ so our workflow engine needs to plug in custom adapter code for such interaction
 (and for when data processing is complex enough and requires a real programming language).
 But, overall, RDF provides a great data model with standard and uniform tools to process, persist and serialize information with no impedance mismatch.
 
-A mixed model
-=============
+A mixed paradigm
+================
 Most programmers (including me) are scared of building applications using something other than
 their favourite programming language. Filling in the gaps of some 'bubbles and arrows' workflow framework can be frustrating and painful, especially when such tools are built to appeal managers, selling the illusion to create applications with almost no programming skills.
 Therefore, it's fundamental a smooth integration of declarative RDF processing with regular programming.
@@ -123,13 +123,13 @@ open Iride
 type Schema = GraphProvider<Schema="schema.ttl">
 
 let (|EUR|USD|Other|) (offer: Schema.Offer) =
-    match offer.PriceCurrency |> Seq.exactlyOne with
+    match Seq.exactlyOne offer.PriceCurrency with
     | "EUR" -> EUR offer
     | "USD" -> USD offer
     | _ -> Other offer
 
 let (|Expensive|_|) (offer: Schema.Offer) =
-    let price = offer.Price |> Seq.exactlyOne
+    let price = Seq.exactlyOne offer.Price
     match offer with
     | EUR _ ->
         if price > 200m
@@ -143,7 +143,7 @@ let (|Expensive|_|) (offer: Schema.Offer) =
 
 let sendOffer = function
     | Expensive offer ->
-        let gtin = offer.Gtin |> Seq.exactlyOne
+        let gtin = Seq.exactlyOne offer.Gtin
         printfn "promote %s to rich customers" gtin
     | _ -> ()
 
@@ -154,10 +154,10 @@ let sendOffers (data: VDS.RDF.IGraph) =
 
 Notice how provided types help navigating information but lack precision.
 `Price`, `PriceCurrency` and `Gtin` are sequences because RDF allows multiple property values.
-Here the application is assuming there is a single value for all of them
+Here, the application is assuming there is a single value for all of them
 (possibly relying on a previous SHACL validation step, because the schema only describes a domain, imposing no constraint).
 
-In F# we enjoy the kind of precision given by union types.
+In F#, we enjoy the kind of precision given by union types.
 I argue their strength is more in taming cyclomatic complexity rather than in information modeling.
 By providing exaustive case matching (like active patterns in the example), union types implicitly
 constrain the processing paths, hence they pertain more to the dynamic aspect of a system.
