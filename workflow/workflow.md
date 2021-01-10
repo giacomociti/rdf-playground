@@ -154,7 +154,7 @@ let sendOffers (data: VDS.RDF.IGraph) =
 
 Notice how provided types help navigating information but lack precision.
 `Price`, `PriceCurrency` and `Gtin` are sequences because RDF allows multiple property values.
-Here, the application is assuming there is a single value for all of them
+Here, the application is assuming there is a single value for each of them
 (possibly relying on a previous SHACL validation step, because the schema only describes a domain, imposing no constraint).
 
 In F#, we enjoy the kind of precision given by union types.
@@ -162,12 +162,46 @@ I argue their strength is more in taming cyclomatic complexity rather than in in
 By providing exaustive case matching (like active patterns in the example), union types implicitly
 constrain the processing paths, hence they pertain more to the dynamic aspect of a system.
 
+The next example shows yet another option, in which we get rid of the workflow engine
+and throw into the mix union types for branching logic (namely `Option` to short-circuit on failure)
+and type providers to access raw graph data encapsulated in OO-style types:
+
+
+```fsharp
+open Iride
+open VDS.RDF
+
+type G = GraphProvider<Schema = """
+    @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix : <http://example.org/> .
+
+    :keyword rdfs:domain :SearchRequest ;
+         rdfs:range xsd:string .
+""">
+
+let validKeyword k = String.length k > 3
+
+type SearchRequest private(request: G.SearchRequest) =
+
+    member _.Keywords = request.Keyword |> Seq.filter validKeyword
+
+    static member TryCreate(data: IGraph) =
+        match G.SearchRequest.Get data |> Seq.toArray with
+        | [| r |] ->
+            if r.Keyword |> Seq.exists validKeyword
+            then Some (SearchRequest r)
+            else None
+        | _ -> None
+```
+
+
 ## Conclusion
 Type Providers and data related technologies like RDF are expected to live inside adapters at the
 boundaries of applications, far removed from the core domain logic.
 I argue in favor of admitting them inside the core of information-based applications.
 Although my aim is mainly thought-provoking, I really hope to see some ideas from declarative, logic based
-paradigms, percolate into mainstream programming, much like what happened with functional programming
+paradigms percolate into mainstream programming, much like what happened with functional programming
 permeating OO languages.
 
 
