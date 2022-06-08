@@ -1,0 +1,73 @@
+<html>
+    <head>
+        <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
+        <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
+        <style>
+            .yasgui .autocompleteWrapper {
+              display: none !important;
+            }
+          </style>
+      </head>
+      <body>
+        <script src="https://unpkg.com/n3/browser/n3.min.js"></script>
+        <script src="http://rdf.js.org/comunica-browser/versions/latest/engines/query-sparql-rdfjs/comunica-browser.js"></script>
+        
+        <textarea id="rdf" rows="8" cols="60">
+PREFIX : <http://ex.org/>
+
+:P1 a :Person ;
+    :age 42 ;
+    :parent :P2 .
+        </textarea>
+        <div id="yasgui"></div>
+
+        <script language="JavaScript">
+            //console.log(window)
+            const Store = window.N3.Store;
+            const Parser = window.N3.Parser;
+            
+            const rdf = document.getElementById('rdf');
+            const yasgui = new Yasgui(document.getElementById("yasgui"));
+            const yasqe = yasgui.getTab().yasqe;
+            const parser = new Parser();
+            const engine = new Comunica.QueryEngine();
+
+            async function query(sparql, rdf) {
+                const store = new Store();
+                store.addQuads(parser.parse(rdf));
+                const result = await engine.query(sparql, { sources: [store]});
+                const { data } = await engine.resultToString(result, getMediaType(result.resultType));
+                const queryResponse = await streamToString(data);
+                return queryResponse;
+            }
+
+            function getMediaType(resultType) {
+                switch (resultType) {
+                    case 'bindings':
+                        return 'application/sparql-results+json';
+                    case 'quads':
+                        return 'text/turtle' ; //'application/n-quads' ;
+                    default:
+                        console.log(`Unknown resultType ${resultType}.`);
+                        return 'application/sparql-results+json';
+                }
+            }
+
+            async function streamToString(stream) {
+                const chunks = [];
+                // TODO check if chunks are strings or byte arrays
+                for await (const chunk of stream) {
+                    chunks.push(chunk);
+                }
+                console.log(chunks);
+                return chunks.join('');
+            }
+
+            yasqe.query = async (yasqeInstance) =>  {
+                const queryResponse = await query(yasqe.getValue(), rdf.value);
+                yasqe.emit("queryResponse", queryResponse);
+            }
+
+        </script>
+      </body>
+</html>
